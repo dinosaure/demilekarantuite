@@ -38,6 +38,14 @@ let foldl f acc grid =
   (x + 1, snd @@ List.fold_left (fun (y, acc) tile -> (y + 1, f (x, y) acc tile)) (0, acc) row))
   (0, acc) grid
 
+let available_cells =
+  foldl (fun (x, y) acc tile -> if Tile.is_empty tile then (x, y) :: acc else acc) []
+
+let is_full grid =
+  match  available_cells grid with
+  | [] -> true
+  | _ -> false
+
 let pp_tile fmt tile =
   Format.fprintf fmt "%s" (Tile.to_string tile)
 let pp_row pp_tile fmt row =
@@ -69,7 +77,7 @@ let pp_grid pp_row fmt (header, grid) =
   Format.print_newline ()
 
 let update grid =
-  match foldl (fun (x, y) acc tile -> if Tile.is_empty tile then (x, y) :: acc else acc) [] grid with
+  match available_cells grid with
     | [] -> raise Full_grid
     | cells ->
       let (x', y') = List.nth cells (Random.int (List.length cells)) in
