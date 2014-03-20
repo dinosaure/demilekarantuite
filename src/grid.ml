@@ -93,19 +93,15 @@ let combine_left row =
     | [] -> []
     | x :: r -> Tile.empty :: (Tile.succ value) :: r
   in
-  (fun (combine, _, new_row) -> combine, List.rev new_row)
+  (fun (combine, _, new_row) -> List.length combine > 0, combine, List.rev new_row)
   @@ List.fold_left
     (fun (combine, prev, row) tile -> match prev with
       | None -> combine, Some tile, tile :: row
       | Some prev ->
         if Tile.compare prev tile && not (Tile.is_empty tile)
-        then combine || true, Some Tile.empty, merge tile row
+        then Tile.succ tile :: combine, Some Tile.empty, merge tile row
         else combine, Some tile, tile :: row)
-    (false, None, []) row
-
-let ( |= ) f (ret, grid) =
-  let (ret', grid') = f grid
-  in ret || ret', grid'
+    ([], None, []) row
 
 let deflate_left row =
   let rec complete old_row new_row =
@@ -121,20 +117,37 @@ let deflate_left row =
       else ((0, (ignore > 0) || compress), tile :: acc))
     ((0, false), []) row
 
+let ( >>= ) (ret, combine, grid, row) deflate_left =
+  let (new_ret, new_row) = deflate_left row in
+  (new_ret || ret, combine, grid, new_row)
+
+let ( <!> ) (ret, combine, grid, row) combine_left =
+  let (new_ret, new_combine, new_row) = combine_left row in
+  (new_ret || ret, new_combine :: combine, grid, new_row)
+
+let ( >|= ) (ret, combine, grid, row) deflate_left =
+  let (new_ret, new_row) = deflate_left row in
+  (new_ret || ret, combine, new_row :: grid)
+
 let move_left grid =
-  (fun (ret, grid) -> ret, List.rev grid)
-  @@ List.fold_left (fun (ret, grid) row ->
-    let (new_ret, new_row) = deflate_left |= (combine_left |= deflate_left row) in
-    (new_ret || ret, new_row :: grid)) (false, []) grid
+  (fun (stat, combine, grid) -> stat, List.concat combine, List.rev grid)
+  @@ List.fold_left (fun (stat, combine, grid) row ->
+    (stat, combine, grid, row)
+    >>= deflate_left
+    <!> combine_left
+    >|= deflate_left) (false, [], []) grid
+
 let move_right grid =
-  let (score, grid) = move_left (rotate @@ rotate @@ grid) in
-  (score, rotate @@ rotate @@ grid)
+  let (stat, combine, grid) = move_left (rotate @@ rotate @@ grid) in
+  (stat, combine, rotate @@ rotate @@ grid)
+
 let move_up grid =
-  let (score, grid) = move_left (rotate @@ rotate @@ rotate @@ grid) in
-  (score, rotate @@ grid)
+  let (stat, combine, grid) = move_left (rotate @@ rotate @@ rotate @@ grid) in
+  (stat, combine, rotate @@ grid)
+
 let move_down grid =
-  let (score, grid) = move_left (rotate @@ grid) in
-  (score, rotate @@ rotate @@ rotate @@ grid)
+  let (stat, combine, grid) = move_left (rotate @@ grid) in
+  (stat, combine, rotate @@ rotate @@ rotate @@ grid)
 
 let print grid =
   let fmt = Format.std_formatter in
