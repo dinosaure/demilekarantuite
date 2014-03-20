@@ -10,4 +10,4 @@ Executable "demilekarantuite"
   Install:    false
   Path:       src
   BuildTools: ocamlbuild
-  MainIs:     main.ml
+  MainIs:     demilekarantuite.ml
