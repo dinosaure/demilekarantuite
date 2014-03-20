@@ -1,0 +1,13 @@
+OASISFormat: 0.4
+Name:        2048
+Version:     0.1
+Synopsis:    2048 in OCaml
+Authors:     Romain Calascibetta
+License:     MIT
+Plugins:     DevFiles (0.4)
+
+Executable "demilekarantuite"
+  Install:    false
+  Path:       src
+  BuildTools: ocamlbuild
+  MainIs:     main.ml
