@@ -13,4 +13,4 @@ val move_up: t -> (bool * Tile.t list * t)
 
 val update: t -> t
 
-val print: t -> unit
+val pp_print: t -> unit

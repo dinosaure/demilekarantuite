@@ -149,7 +149,7 @@ let move_down grid =
   let (stat, combine, grid) = move_left (rotate @@ grid) in
   (stat, combine, rotate @@ rotate @@ rotate @@ grid)
 
-let print grid =
+let pp_print grid =
   let fmt = Format.std_formatter in
   Format.fprintf fmt "%a"
   (pp_grid (pp_row pp_tile))
