@@ -1,10 +1,11 @@
-OASISFormat: 0.4
-Name:        2048
-Version:     0.1
-Synopsis:    2048 in OCaml
-Authors:     Romain Calascibetta
-License:     MIT
-Plugins:     DevFiles (0.4)
+OASISFormat:  0.4
+Name:	      2048
+Version:      0.1
+Synopsis:     2048 in OCaml
+Authors:      Romain Calascibetta
+License:      MIT
+Plugins:      DevFiles (0.4)
+OCamlVersion: >= 4.01
 
 Executable "demilekarantuite"
   Install:    false
