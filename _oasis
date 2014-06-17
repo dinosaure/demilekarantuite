@@ -6,9 +6,10 @@ Authors:      Romain Calascibetta
 License:      MIT
 Plugins:      DevFiles (0.4)
 OCamlVersion: >= 4.01
+BuildTools:   ocamlbuild
 
 Executable "demilekarantuite"
-  Install:    false
-  Path:       src
-  BuildTools: ocamlbuild
-  MainIs:     demilekarantuite.ml
+  Install:		false
+  Path:			src
+  CompiledObject:	byte
+  MainIs:		demilekarantuite.ml

@@ -15,3 +15,4 @@
 "_darcs": not_hygienic
 # Executable demilekarantuite
 # OASIS_STOP
+true: syntax(camlp4o)
