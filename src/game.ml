@@ -29,9 +29,9 @@ let step score grid action =
     | Up -> Grid.move_up grid
     | Down -> Grid.move_down grid
   in let new_score = List.fold_left
-    (fun acc x -> Tile.to_int x + acc)
-    score combine
+      (fun acc x -> Tile.to_int x + acc)
+      score combine
   in let new_grid =
     if stat then Grid.update grid else grid
   in end_of_game new_score new_grid
-    |> (fun _ -> (new_score, new_grid))
+     |> (fun _ -> (new_score, new_grid))

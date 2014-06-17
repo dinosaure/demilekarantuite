@@ -1,5 +1,3 @@
-exception End_of_game of int
-
 let rec loop (score, grid) =
   let () =
     Grid.pp_print grid;
@@ -16,6 +14,5 @@ let rec loop (score, grid) =
 let () =
   let () = Random.self_init () in
   try loop (0, (Grid.update @@ Grid.update @@ Grid.make 4)) with
-    | Grid.Full_grid -> print_endline "te naze"
-    | End_of_file -> print_endline "te bidon"
-    | Game.End_of_game score -> print_endline "te nul"
+  | Grid.Full_grid -> print_endline "te naze"
+  | Game.End_of_game score -> print_endline "te nul"

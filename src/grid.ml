@@ -14,13 +14,13 @@ let make size =
 
 let iteri f grid =
   List.iteri
-  (fun x row -> List.iteri (fun y tile -> f (x, y) tile) row)
-  grid
+    (fun x row -> List.iteri (fun y tile -> f (x, y) tile) row)
+    grid
 
 let mapi f grid =
   List.mapi
-  (fun x row -> List.mapi (fun y tile -> f (x, y) tile) row)
-  grid
+    (fun x row -> List.mapi (fun y tile -> f (x, y) tile) row)
+    grid
 
 let nth (x, y) grid =
   let size_x = List.length grid in
@@ -34,9 +34,9 @@ let nth (x, y) grid =
 
 let foldl f acc grid =
   snd @@ List.fold_left
-  (fun (x, acc) row ->
-  (x + 1, snd @@ List.fold_left (fun (y, acc) tile -> (y + 1, f (x, y) acc tile)) (0, acc) row))
-  (0, acc) grid
+    (fun (x, acc) row ->
+       (x + 1, snd @@ List.fold_left (fun (y, acc) tile -> (y + 1, f (x, y) acc tile)) (0, acc) row))
+    (0, acc) grid
 
 let available_cells =
   foldl (fun (x, y) acc tile -> if Tile.is_empty tile then (x, y) :: acc else acc) []
@@ -50,25 +50,25 @@ let pp_tile fmt tile =
   Format.fprintf fmt "%s" (Tile.to_string tile)
 let pp_row pp_tile fmt row =
   List.iteri
-  (fun i tile ->
-    Format.pp_print_tab fmt ();
-    Format.fprintf fmt "%a" pp_tile tile)
-  row
+    (fun i tile ->
+       Format.pp_print_tab fmt ();
+       Format.fprintf fmt "%a" pp_tile tile)
+    row
 let pp_header width fmt header =
   let first = Array.map (fun x -> String.make (x + 1) ' ') width in
   Array.iteri (fun i cell ->
-    Format.pp_set_tab fmt ();
-    for z = 0 to (String.length (List.nth header i)) - 1
+      Format.pp_set_tab fmt ();
+      for z = 0 to (String.length (List.nth header i)) - 1
       do cell.[z] <- (List.nth header i).[z] done;
-    Format.fprintf fmt "%s" cell)
-  first
+      Format.fprintf fmt "%s" cell)
+    first
 let pp_grid pp_row fmt (header, grid) =
   let width = Array.create (List.length grid) 0 in
 
   iteri (fun (x, y) tile ->
-    width.(y) <- max (String.length (Tile.to_string tile)) width.(y)) grid;
+      width.(y) <- max (String.length (Tile.to_string tile)) width.(y)) grid;
   List.iteri (fun i cell ->
-    width.(i) <- max (String.length cell) width.(i)) header;
+      width.(i) <- max (String.length cell) width.(i)) header;
 
   Format.pp_open_tbox fmt ();
   Format.fprintf fmt "%a@\n" (pp_header width) header;
@@ -78,11 +78,11 @@ let pp_grid pp_row fmt (header, grid) =
 
 let update grid =
   match available_cells grid with
-    | [] -> raise Full_grid
-    | cells ->
-      let (x', y') = List.nth cells (Random.int (List.length cells)) in
-      let new_tile = if Random.float 10. > 9. then Tile.two else Tile.one in
-      mapi (fun (x, y) old_tile -> if x = x' && y = y' then new_tile else old_tile) grid
+  | [] -> raise Full_grid
+  | cells ->
+    let (x', y') = List.nth cells (Random.int (List.length cells)) in
+    let new_tile = if Random.float 10. > 9. then Tile.two else Tile.one in
+    mapi (fun (x, y) old_tile -> if x = x' && y = y' then new_tile else old_tile) grid
 
 let rotate grid =
   let size = List.length grid in
@@ -96,11 +96,11 @@ let combine_left row =
   (fun (combine, _, new_row) -> List.length combine > 0, combine, List.rev new_row)
   @@ List.fold_left
     (fun (combine, prev, row) tile -> match prev with
-      | None -> combine, Some tile, tile :: row
-      | Some prev ->
-        if Tile.compare prev tile && not (Tile.is_empty tile)
-        then Tile.succ tile :: combine, Some Tile.empty, merge tile row
-        else combine, Some tile, tile :: row)
+       | None -> combine, Some tile, tile :: row
+       | Some prev ->
+         if Tile.compare prev tile && not (Tile.is_empty tile)
+         then Tile.succ tile :: combine, Some Tile.empty, merge tile row
+         else combine, Some tile, tile :: row)
     ([], None, []) row
 
 let deflate_left row =
@@ -112,9 +112,9 @@ let deflate_left row =
   (fun ((_, compress), new_row) -> compress, List.rev @@ complete row @@ new_row)
   @@ List.fold_left
     (fun ((ignore, compress), acc) tile ->
-      if Tile.is_empty tile
-      then ((ignore + 1, compress), acc)
-      else ((0, (ignore > 0) || compress), tile :: acc))
+       if Tile.is_empty tile
+       then ((ignore + 1, compress), acc)
+       else ((0, (ignore > 0) || compress), tile :: acc))
     ((0, false), []) row
 
 let ( >>= ) (ret, combine, grid, row) deflate_left =
@@ -132,10 +132,10 @@ let ( >|= ) (ret, combine, grid, row) deflate_left =
 let move_left grid =
   (fun (stat, combine, grid) -> stat, List.concat combine, List.rev grid)
   @@ List.fold_left (fun (stat, combine, grid) row ->
-    (stat, combine, grid, row)
-    >>= deflate_left
-    <!> combine_left
-    >|= deflate_left) (false, [], []) grid
+      (stat, combine, grid, row)
+      >>= deflate_left
+          <!> combine_left
+      >|= deflate_left) (false, [], []) grid
 
 let move_right grid =
   let (stat, combine, grid) = move_left (rotate @@ rotate @@ grid) in
@@ -152,5 +152,5 @@ let move_down grid =
 let pp_print grid =
   let fmt = Format.std_formatter in
   Format.fprintf fmt "%a"
-  (pp_grid (pp_row pp_tile))
-  ((make' (fun _ -> "_") (List.length grid)), grid)
+    (pp_grid (pp_row pp_tile))
+    ((make' (fun _ -> "_") (List.length grid)), grid)
