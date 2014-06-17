@@ -1,17 +1,24 @@
-type t = Cnat.t
+type t = int
 
-let empty = Cnat.zero
-let one = Cnat.succ @@ Cnat.zero
-let two = Cnat.succ @@ Cnat.succ @@ Cnat.zero
+let empty = 0
+let one = 1
+let two = 2
 
-let is_empty = Cnat.is_zero
-let succ = Cnat.succ
-let compare = Cnat.eq
+let is_empty = ((=) 0)
+let succ = ((+) 1)
+let compare = (=)
+
+let rec pow a n =
+  if n = 0 then 1
+  else if n = 1 then a
+  else
+    let b = pow a (n / 2) in
+    b * b * (if n mod 2 = 0 then 1 else a)
 
 let to_string v =
   if is_empty v then "_"
-  else string_of_int (Cnat.to_int (Cnat.pow (Cnat.of_int 2) v))
+  else string_of_int (pow 2 v)
 
 let to_int v =
   if is_empty v then 0
-  else (Cnat.to_int (Cnat.pow (Cnat.of_int 2) v))
+  else pow 2 v
