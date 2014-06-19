@@ -84,6 +84,7 @@ let move_tile p_from p_to tile =
       >>= (fun () ->
           (wrapper ## classList) ## remove
             (Js.string "hidden");
+
           Lwt.return ()));
 
   Dom.appendChild wrapper inner;

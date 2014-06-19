@@ -81,7 +81,7 @@ let reduce_merge p_merge p_from t_merge diff =
   let rec aux acc update = function
     | [] -> List.rev @@
       if update then acc
-      else (`Move (p_from, p_merge, t_merge) :: acc)
+      else (acc @ [ `Move (p_from, p_merge, t_merge) ])
     | `Move (p1, p2, tile) :: r when Position.equal p2 p_from ->
       aux (`Move (p1, p_merge, tile) :: acc) true r
     | x :: r -> aux (x :: acc) update r
