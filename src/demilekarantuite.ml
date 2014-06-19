@@ -45,6 +45,11 @@ let add_tile position tile =
   Dom.appendChild tileContainer wrapper;
   ()
 
+let nth lst idx =
+  match Js.Opt.to_option (lst##item(idx)) with
+  | Some x -> x
+  | None -> raise Not_found
+
 let move_tile p_from p_to tile =
   let document = Html.window ## document in
   let wrapper = Html.createDiv document in
@@ -54,11 +59,9 @@ let move_tile p_from p_to tile =
       (document ## querySelector (Js.string ".tile-container"))
       (fun () -> raise Not_found)
       (fun x -> x) in
-  let old_tile = Js.Opt.case
-      (document ## querySelector (Js.string ("." ^ (position_class p_from))))
-      (fun () ->
-         raise Not_found)
-      (fun x -> x) in
+  let tiles =
+    (tileContainer ## querySelectorAll
+       (Js.string ("." ^ (position_class p_from)))) in
 
   apply_classes wrapper
     ["tile"; value_class tile; position_class p_to; "hidden"];
@@ -67,18 +70,20 @@ let move_tile p_from p_to tile =
 
   Lwt_js_events.async (fun () ->
       Lwt_js_events.request_animation_frame () >>= fun () ->
-      (old_tile ## classList) ## remove
-        (Js.string (position_class p_from));
-      (old_tile ## classList) ## add
-        (Js.string (position_class p_to));
+
+      for i = 0 to (tiles ## length) - 1
+      do
+        ((nth tiles i) ## classList) ## remove
+          (Js.string (position_class p_from));
+        ((nth tiles i) ## classList) ## add
+          (Js.string (position_class p_to));
+      done;
+
       Lwt.return ()
-      >>= (fun () -> Lwt_js_events.transitionend old_tile)
+      >>= (fun () -> Lwt_js_events.transitionend (nth tiles 0))
       >>= (fun () ->
-          Dom.removeChild tileContainer old_tile;
-          (* (old_tile ## classList) ## add (Js.string "hidden"); *)
           (wrapper ## classList) ## remove
             (Js.string "hidden");
-
           Lwt.return ()));
 
   Dom.appendChild wrapper inner;
@@ -86,27 +91,13 @@ let move_tile p_from p_to tile =
 
   ()
 
-let nth lst idx =
-  match Js.Opt.to_option (lst##item(idx)) with
-  | Some x -> x
-  | None -> raise Not_found
-
 let merge_tile position tile =
   let document = Html.window ## document in
+  let wrapper = Html.createDiv document in
+  let inner = Html.createDiv document in
 
   let tileContainer = Js.Opt.case
       (document ## querySelector (Js.string ".tile-container"))
-      (fun () -> raise Not_found)
-      (fun x -> x) in
-
-  let tiles =
-    (tileContainer ## querySelectorAll
-       (Js.string ("." ^ (position_class position)))) in
-
-  let wrapper = nth tiles 0 in
-  let inner =
-    Js.Opt.case
-      (wrapper ## querySelector (Js.string ".tile-inner"))
       (fun () -> raise Not_found)
       (fun x -> x) in
 
@@ -115,7 +106,8 @@ let merge_tile position tile =
   apply_classes inner ["tile-inner"];
   inner ## innerHTML <- (Js.string @@ Tile.to_string tile);
 
-  Dom.removeChild tileContainer (nth tiles 1);
+  Dom.appendChild wrapper inner;
+  Dom.appendChild tileContainer wrapper;
 
   ()
 
@@ -126,6 +118,23 @@ let actuator = function
     merge_tile position tile
   | `Move (p1, p2, tile) ->
     move_tile p1 p2 tile
+
+let collector () =
+  let document = Html.window ## document in
+
+  let tileContainer = Js.Opt.case
+      (document ## querySelector (Js.string ".tile-container"))
+      (fun () -> raise Not_found)
+      (fun x -> x) in
+
+  let tiles =
+    (tileContainer ## querySelectorAll
+       (Js.string (".hidden"))) in
+
+  for i = 0 to (tiles ## length) - 1
+  do Dom.removeChild tileContainer (nth tiles i); done;
+
+  ()
 
 let schedule lst =
   List.iter

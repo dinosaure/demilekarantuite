@@ -154,7 +154,7 @@ let deflate_left position north diff row =
               then
                 let direction = Position.target north Position.West in
                 let position' = Position.nmove position distance direction in
-                reduce_move position position' tile diff
+                `Move (position, position', tile) :: diff
               else diff),
              (0, distance, (ignore > 0) || compress),
              tile :: acc))
