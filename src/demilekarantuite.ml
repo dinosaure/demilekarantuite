@@ -85,6 +85,12 @@ let move_tile p_from p_to tile =
           (wrapper ## classList) ## remove
             (Js.string "hidden");
 
+          for i = 0 to (tiles ## length) - 1
+          do
+            ((nth tiles i) ## classList) ## add
+              (Js.string "hidden");
+          done;
+
           Lwt.return ()));
 
   Dom.appendChild wrapper inner;
@@ -143,7 +149,8 @@ let schedule lst =
        Lwt_js_events.async (fun () ->
            Lwt.return (actuator x)
            >>= fun () -> Lwt_js_events.transitionend (Html.window ## document)))
-    lst
+    lst;
+  collector ()
 
 let main _ =
   let (diff, grid) =
