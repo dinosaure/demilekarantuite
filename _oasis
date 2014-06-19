@@ -13,3 +13,6 @@ Executable "demilekarantuite"
   Path:			src
   CompiledObject:	byte
   MainIs:		demilekarantuite.ml
+  BuildDepends:		js_of_ocaml,
+                        js_of_ocaml.syntax,
+                        lwt
