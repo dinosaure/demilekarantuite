@@ -126,6 +126,38 @@ let actuator = function
   | `Move (p1, p2, tile) ->
     move_tile p1 p2 tile
 
+let removeAllChild node =
+  let lst = node ## childNodes in
+  let rec aux = function
+    | 0 -> ()
+    | n -> Dom.removeChild node (nth lst (n - 1)); aux (n - 1)
+  in aux (lst ## length)
+
+
+let update_score old_score new_score =
+  let document = Html.window ## document in
+  let diff = new_score - old_score in
+
+  let scoreContainer = Js.Opt.case
+      (document ## querySelector (Js.string ".score-container"))
+      (fun () -> raise Not_found)
+      (fun x -> x) in
+
+  removeAllChild scoreContainer;
+  scoreContainer ## innerHTML <- Js.string (string_of_int new_score);
+
+  if diff > 0
+  then
+    let addition = Html.createDiv document in
+
+    (addition ## classList) ## add (Js.string "score-addition");
+    addition ## innerHTML <- Js.string ("+" ^ (string_of_int diff));
+
+    Dom.appendChild scoreContainer addition
+  else ();
+
+  ()
+
 let collector () =
   let document = Html.window ## document in
 
@@ -152,6 +184,7 @@ let schedule lst =
     lst;
   collector ()
 
+
 let main _ =
   let (diff, grid) =
     Grid.make 4
@@ -174,8 +207,11 @@ let main _ =
            begin
              try let (diff, score', grid') =
                Game.step !score !grid (Game.of_keycode (event ## keyCode)) in
+
                schedule diff;
                grid := grid';
+
+               update_score !score score';
                score := score';
              with
              | Invalid_argument _ -> ()
